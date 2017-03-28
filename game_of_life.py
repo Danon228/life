@@ -18,6 +18,8 @@ class Matrix:
             name += 1
         print(self.names)
 
+
+
     def __str__(self):
         st = ''
         for y in range(self.y):
