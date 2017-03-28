@@ -11,6 +11,7 @@ class Matrix:
         self.x = count_x
         self.y = count_y
         self.matrix = [[None]*self.y for y in range(self.x)]
+        self.massive = [[0] * self.y for y in range(self.x)]
         name = 0
         self.names = []
         for _ in range(self.x * self.y):
@@ -59,17 +60,25 @@ class Matrix:
         result = self.matrix[x][y].__class__ == cls
         return result
 
-    def refresh(self,x = 0, y = 0, massive = [[None]*self.y for y in range(self.x)]):
+    def refresh(self,x = 0, y = 0, m):
         ''' проверяет имеющиеся объекты, запускает действия для каждого '''
-        if self.belonging_class(x, y, Animal):
-            for xk in [-1, 0, 1]:
-                for yk in [-1, 0, 1]:
-                    if not xk and not yk: # если клетка не 0,0
-                        x1 = xk+x if xk+x >= 0 else None
-                        y1 = yk+y if yk+y >= 0 else None
-                        if x1 and y1 and not massive[x1][y1]: # если клетка существует
-                                                              # и в ней что-то есть
-                            pass
+        for l in range(self.y):
+            line = []
+            for t in range(self.x):
+                line.append(str(self.massive[t][l]))
+            st += ', '.join(line)
+        if st.find('0')>=0:
+            if self.belonging_class(x, y, Animal):
+                for xk in [-1, 0, 1]:
+                    for yk in [-1, 0, 1]:
+                        if not xk and not yk: # если клетка не 0,0
+                            x1 = xk+x if xk+x >= 0 else None
+                            y1 = yk+y if yk+y >= 0 else None
+                            if x1 and y1:# если клетка существует
+                                self.massive[x1][y1] = belonging_class(x1,y1,Animal) if belonging_class(x1,y1,Animal) else None
+                                refresh(x1,y1,self.massive)
+
+
 
 # massive[x1][y1] = self.belonging_class(self,x1,y1, Animal) if belonging_class(self,x1,y1, Animal) else
 #             if massive[x-1][y-1] and massive[x][y-1] == None:
