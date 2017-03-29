@@ -1,9 +1,12 @@
 from random import randint
 
+
 WIDTH = 10
 HEIGHT = 15
 COUNT_A = 10
 COUNT_F = 10
+COUNT_P = 10
+
 
 class Matrix:
     def __init__(self, count_x, count_y):
@@ -18,8 +21,7 @@ class Matrix:
             self.names.append(name)
             name += 1
         print(self.names)
-
-
+        self.options = dict()
 
     def __str__(self):
         st = ''
@@ -30,12 +32,19 @@ class Matrix:
             st += ', '.join(line)+'\n'
         return st
 
+    def create_options(self):
+        for x in range(WIDTH):
+            for y in range(HEIGHT):
+                if self.belonging_class(x,y,Animal) or self.belonging_class(x,y,Predator):
+                    self.options[matrix[x][y]]['life'] = 100
+                    self.options[matrix[x][y]]['energy'] = 100
+
     def get_count(self):
-        for x in range(self.matrix):
-            for y in range(self.matrix):
-                if self.matrix[x][y] != None:
-                    count+=1
-        return count
+        for x in range(WIDTH):
+            for y in range(HEIGHT):
+                if not(self.matrix[x][y]):
+                    self.count+=1
+        return self.count
 
     def get_name(self):
         return self.names.pop()
@@ -60,23 +69,72 @@ class Matrix:
         result = self.matrix[x][y].__class__ == cls
         return result
 
-    def refresh(self,x = 0, y = 0, m):
+    def delete_element(self,x,y):
+        self.names.append(self.matrix[x][y])
+        self.matrix[x][y] = None
+
+    def give_life(self, x, y,count = 10):
+        self.options[matrix[x][y]]['life'] += count
+
+    def give_energy(self, x, y,count = 10):
+        self.options[matrix[x][y]]['energy'] += count
+
+    def take_life(self, x, y,count = 10):
+        self.options[matrix[x][y]]['life'] -= count
+
+    def take_energy(self, x, y,count = 10):
+        self.options[matrix[x][y]]['energy'] -= count
+
+    def travel(self,x1, y1, x2, y2):
+        self.matrix[x2][y2] = self.matrix[x1][y1]
+        self.matrix[x1][y1] = None
+
+    def attack(self,x1,y1,x2,y2):
+        self.take_energy(x1,y1,self.options[matrix[x1][y1]]['energy']-self.options[matrix[x2][y2]]['energy'])
+        self.take_energy(x2,y2,self.options[matrix[x2][y2]]['energy'])
+
+
+
+
+
+'''  def get_neighbours(self,x,y):
+       neighbours = []
+       for xk in [-1,0,1]:
+           for yk in [-1, 0, 1]:
+               x1 = xk+x if xk+x>=0 else None
+               y1 = yk+y if yk+y>=0 else None
+               if x1 and y1:
+                   neighbours.append( 1 if belonging_class(x1,y1,Animal))
+                   neighbours.append( 2 if belonging_class(x1,y1,Food))
+                   neighbours.append(3 if belonging_class(x1, y1, Predator))
+                   neighbours.append(2 if belonging_class(x1, y1, Food))'''
+
+
+    def refresh(self):
         ''' проверяет имеющиеся объекты, запускает действия для каждого '''
-        for l in range(self.y):
-            line = []
-            for t in range(self.x):
-                line.append(str(self.massive[t][l]))
-            st += ', '.join(line)
-        if st.find('0')>=0:
-            if self.belonging_class(x, y, Animal):
-                for xk in [-1, 0, 1]:
-                    for yk in [-1, 0, 1]:
-                        if not xk and not yk: # если клетка не 0,0
-                            x1 = xk+x if xk+x >= 0 else None
-                            y1 = yk+y if yk+y >= 0 else None
-                            if x1 and y1:# если клетка существует
-                                self.massive[x1][y1] = belonging_class(x1,y1,Animal) if belonging_class(x1,y1,Animal) else None
-                                refresh(x1,y1,self.massive)
+        for x in range(WIDTH):
+            for y in range(HEIGHT):
+                if self.belonging_class(x, y, Animal):
+                    for xk in [-1, 0, 1]:
+                        for yk in [-1, 0, 1]:
+                            if not xk and not yk: # если клетка не 0,0
+                                x1 = xk+x if xk+x >= 0 else None
+                                y1 = yk+y if yk+y >= 0 else None
+                                if x1 and y1:# если клетка существует
+                                    if self.belonging_class(x1,y1,Food):
+                                        self.give_life(x,y)
+                                        self.take_energy(x,y)
+                                        if self.options[matrix[x][y]]['energy'] < 0 :
+                                            count = -(self.options[matrix[x][y]]['energy'])
+                                            self.take_lifes(x,y,count)
+                                    if self.belonging_class(x1,y1,Animal):
+                                        if self.options[matrix[x][y]]['energy'] >= self.options[matrix[x1][y1]]['energy']:
+
+
+
+
+
+
 
 
 
@@ -92,17 +150,33 @@ class Matrix:
 #         refresh(x,y,massive)
             
 
+
+
 class Agent:
+    def __init__(self):
+        self.lifes = 100
+        self.energy = 100
+
     def __str__(self):
         return str(self.name)
         
       
 class Animal(Agent):               
     def __init__(self, name):
+        super().__init__()
+        self.name = name
+
+
+a = Animal()
+a.lifes
+
+class Predator(Agent):
+    def __init__(self, name):
+        super().__init__()
         self.name = name
         
 
-class Food(Agent):
+class Food:
     def __init__(self,name):
         self.name = name
       
@@ -126,6 +200,17 @@ while l != COUNT_F:
         print('Элемент занят', e)
         l -= 1
     l += 1
+
+while k != COUNT_P:
+    predator = Predator(matrix.get_name())
+    try:
+        matrix.put_elements(predator)
+    except Exception as e:
+        print('Элемент занят', e)
+        k -= 1
+    l += 1
+
+
 animal = Animal(matrix.get_name())
 matrix.put_elements(animal, 0, 0)
 print(matrix.belonging_class(0, 0, Food))
