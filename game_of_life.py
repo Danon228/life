@@ -71,7 +71,7 @@ class Matrix:
         return self.matrix[x][y].__class__ == cls
 
     def delete_element(self,x,y):
-        self.names.append(self.matrix[x][y])
+        self.names.append(int(self.matrix[x][y]))
         self.matrix[x][y] = None
 
     def give_life(self, x, y, count = 10):
@@ -115,10 +115,11 @@ class Matrix:
                y = free_places[k][1]
                if self.get_element(x,y) == 'Empty' or self.get_element(x,y) >= 0:
                    free_places.remove([x,y])
-                if len(free_places) != 0:
-                line = choice.free_places
-                x_free = line[0]
-
+           if len(free_places) !=0:
+               line = choice.free_places
+               x_free = line[0]
+               y_free = line[1]
+       return x_free, y_free
 
     def refresh(self):
         ''' проверяет имеющиеся объекты, запускает действия для каждого '''
@@ -140,10 +141,12 @@ class Matrix:
                                     if self.belonging_class(x1,y1,Animal):
                                         if self.matrix[x][y].energy > self.matrix[x1][y1].energy:
                                             self.attack(x,y,x1,y1)
-                                        elif
-                                            ...
+                                        else:
+                                            x2, y2 = self.find_place(x,y,x1,y1)
+                                            self.travel(x,y,x2,y2)
                                     if self.belonging_class(x1,y1,Predator):
-                                        ...
+                                        x2, y2 = self.find_place(x, y, x1, y1)
+                                        self.travel(x, y, x2, y2)
                 if self.belongig_class(x,y,Predator):
                     for xk in [-1, 0, 1]:
                         for yk in [-1, 0, 1]:
@@ -163,10 +166,10 @@ class Matrix:
                                                 self.take_energy(x1,y1,self.matrix[x1][y1].energy)
                                                 self.take_life(x1,y1,30 - self.matrix[x1][y1].energy)
                                                 self.give_life(x,y,30 - self.matrix[x1][y1].energy)
-
-
-                                            pass
                                     if self.belonging_class(x1,y1,Predator):
+                                        if self.matrix[x][y].energy > self.matrix[x1][y1].energy:
+                                            self.take_energy()
+
 
 
 
