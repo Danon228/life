@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 
 WIDTH = 10
@@ -14,14 +14,13 @@ class Matrix:
         self.x = count_x
         self.y = count_y
         self.matrix = [[None]*self.y for y in range(self.x)]
-        self.massive = [[0] * self.y for y in range(self.x)]
-        name = 0
+        # self.massive = [[0] * self.y for y in range(self.x)]
+        name = 1
         self.names = []
-        for _ in range(self.x * self.y):
+        for _ in range(self.x * self.y+1):
             self.names.append(name)
             name += 1
         print(self.names)
-
 
     def __str__(self):
         st = ''
@@ -50,7 +49,10 @@ class Matrix:
         return self.names.pop()
 
     def get_element(self, x, y):
-        return self.matrix[x][y]
+        if x>=0 and y>=0:
+            return self.matrix[x][y]
+        else:
+            return 'Empty'
         
     def put_elements(self, obj, x=None, y=None):
         ''' вставляет объект по координатам '''
@@ -66,8 +68,7 @@ class Matrix:
             self.matrix[x][y] = obj
 
     def belonging_class(self, x, y, cls):
-        result = self.matrix[x][y].__class__ == cls
-        return result
+        return self.matrix[x][y].__class__ == cls
 
     def delete_element(self,x,y):
         self.names.append(self.matrix[x][y])
@@ -86,6 +87,7 @@ class Matrix:
         self.matrix[x][y].energy -= count
 
     def travel(self,x1, y1, x2, y2):
+        if
         self.matrix[x2][y2] = self.matrix[x1][y1]
         self.matrix[x1][y1] = None
         self.take_energy(x2,y2)
@@ -94,6 +96,29 @@ class Matrix:
         self.take_energy(x1,y1,self.matrix[x1][y1].energy)
         self.take_energy(x2,y2,self.matrix[x2][y2].energy)
         self.take_life(x2,y2,self.matrix[x1][y1].energy - self.matrix[x1][y1].energy)
+
+   def find_place(self,x1,y1,x2,y2):
+       x_free = 2*x1-x2
+       y_free = 2*y1-y2
+       free_places = [[0]*2]*8
+       if self.get_element(x_free, y_free) == 'Empty' or self.get_element(x_free,y_free)>=0:
+           free_places[0][0], free_places[0][1] = x1, y1 + 1
+           free_places[1][0], free_places[1][1] = x1 + 1, y1 + 1
+           free_places[2][0], free_places[2][1] = x1 + 1, y1
+           free_places[3][0], free_places[3][1] = x1 + 1, y1 - 1
+           free_places[4][0], free_places[4][1] = x1, y1 - 1
+           free_places[5][0], free_places[5][1] = x1 - 1, y1 - 1
+           free_places[6][0], free_places[6][1] = x1 - 1, y1
+           free_places[7][0], free_places[7][1] = x1 - 1, y1 + 1
+           for k in range(7):
+               x = free_places[k][0]
+               y = free_places[k][1]
+               if self.get_element(x,y) == 'Empty' or self.get_element(x,y) >= 0:
+                   free_places.remove([x,y])
+                if len(free_places) != 0:
+                line = choice.free_places
+                x_free = line[0]
+
 
     def refresh(self):
         ''' проверяет имеющиеся объекты, запускает действия для каждого '''
@@ -132,7 +157,7 @@ class Matrix:
                                         self.delete_element(x1,y1)
                                         if self.matrix[x][y].energy < 30 :
                                             self.take_energy(x,y,30)
-                                            if matrix[x1][y1]>=30:
+                                            if self.matrix[x1][y1].energy>=30:
                                                 self.take_energy(x1,y1,30)
                                             else:
                                                 self.take_energy(x1,y1,self.matrix[x1][y1].energy)
@@ -140,7 +165,7 @@ class Matrix:
                                                 self.give_life(x,y,30 - self.matrix[x1][y1].energy)
 
 
-                                            ...
+                                            pass
                                     if self.belonging_class(x1,y1,Predator):
 
 
@@ -168,9 +193,12 @@ class Agent:
     def __init__(self):
         self.life = 100
         self.energy = 100
+        self.is_worked = False
 
     def __str__(self):
         return str(self.name)
+
+    def
         
       
 class Animal(Agent):               
@@ -228,4 +256,3 @@ print(matrix.belonging_class(0, 0, Animal))
 print(matrix)
 x, y = int(input('Введите координаты >> '))
 matrix.put_elements(animal, x, y)
-print(matrix.refresh(x, y))
