@@ -1,11 +1,5 @@
 from random import randint, choice
-
-
-WIDTH = 10
-HEIGHT = 15
-COUNT_A = 10
-COUNT_F = 10
-COUNT_P = 10
+from tkinter import *
 
 
 class Matrix:
@@ -25,7 +19,7 @@ class Matrix:
         return st
 
     def get_element(self, x, y):
-        if WIDTH > x >= 0 and HEIGHT > y >= 0 :
+        if self.x > x >= 0 and self.y > y >= 0 :
             return self.matrix[x][y]
         else:
             return 'Empty'
@@ -33,8 +27,8 @@ class Matrix:
     def put_elements(self, obj, x1=None, y1=None):
         ''' вставляет объект по координатам '''
         if not x1 or not y1:
-            x1 = randint(0, WIDTH - 1)
-            y1 = randint(0, HEIGHT - 1)
+            x1 = randint(0, self.x - 1)
+            y1 = randint(0, self.y - 1)
             if self.get_element(x1, y1):
                 print('Клетка занята')
                 return None, None
@@ -57,8 +51,8 @@ class Matrix:
 
     def get_list_of_objects(self):
         self.list_of_objects = []
-        for x in range(WIDTH):
-            for y in range(HEIGHT):
+        for x in range(self.x):
+            for y in range(self.y):
                 if self.get_element(x, y):
                     self.list_of_objects.append(self.get_element(x, y))
         return self.list_of_objects
@@ -71,6 +65,7 @@ class Agent:
         self.is_worked = False
         self.cor_x = 0
         self.cor_y = 0
+        self.IPP = 35
 
     def get_name(self):
         return self.name
@@ -97,6 +92,9 @@ class Agent:
 
 
 class Controller:
+
+    def __init__(self, x, y):
+        self.matrix = Matrix(x,y)
 
     def delete_element(self, obj):
         self.list_of_objects.remove(obj)
@@ -162,7 +160,7 @@ class Controller:
         else:
             return None
 
-    def create_objects(self, count, cls):
+    def create_objects(self, count, cls, IPP):
         i = 0
         while i != count:
             obj = cls()
@@ -170,15 +168,12 @@ class Controller:
             if x_cor or y_cor:
                 obj.cor_x = x_cor
                 obj.cor_y = y_cor
+                if IPP:
+                    obj.IPP = IPP
                 i += 1
 
-    def start_game(self, matrix):
-        self.matrix = matrix
-        self.create_objects(COUNT_A, Animal)
-        self.create_objects(COUNT_P, Predator)
-        self.create_objects(COUNT_F, Food)
-        i = 0
-        while i != 100:
+    def start_game(self, work):
+        if work:
             self.list_of_objects = self.matrix.get_list_of_objects()
             for obj in (self.list_of_objects):
                 neighbour = self.get_list_of_neighbour(obj)
@@ -282,29 +277,176 @@ class Controller:
                         if obj.belong_class(obj, Food):
                             obj.give_life(30)
             self.matrix.refresh(self.list_of_objects)
-            print(self.matrix)
-            i += 1
+
 
 
 class Animal(Agent):               
     def __init__(self):
         super().__init__(100,100)
         self.name = randint(0, 10000000000)
+        self.color = 'blue'
 
 
 class Predator(Agent):
     def __init__(self):
         super().__init__(100, 100)
         self.name = randint(0, 10000000000)
+        self.color = 'red'
 
 
 class Food(Agent):
     def __init__(self):
         super().__init__(0,100)
         self.name = randint(0, 10000000000)
+        self.color = 'yellow'
 
 
-field = Matrix(WIDTH, HEIGHT)
-game_controller = Controller()
-game_controller.start_game(field)
+class Interface(Frame):
+
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.pack(side='left', expand=True, fill='both')
+        self.create_widgets()
+        self.matrix = []
+
+    def create_widgets(self):
+        self.frame_parent = Frame(self)
+        self.frame_parent.pack(side='left', expand=True, fill='both')
+        self.frame_child = Frame(self.frame_parent)
+        self.frame_child.pack(side='left', expand=True, fill='both')
+        self.frame_widgets = Frame(self.frame_parent)
+        self.frame_widgets.pack(side='top', expand=False, fill='x')
+        Label(self.frame_widgets, text='Give parameters:',
+              font='Arial 14').pack(side='top', expand=False)
+        frame_create_matr_1 = Frame(self.frame_widgets, bg='gray')
+        frame_create_matr_1.pack(side='top', expand=True, fill='x')
+        Label(frame_create_matr_1, text='Give Width ',
+              font='Arial 10', bg='gray').pack(side='left')
+        self.ent_x = Entry(frame_create_matr_1)
+        self.ent_x.pack(side='left')
+        Label(frame_create_matr_1, text='Give Height',
+              font='Arial 10', bg='gray').pack(side='left')
+        self.ent_y = Entry(frame_create_matr_1)
+        self.ent_y.pack(side='left')
+        self.but = Button(frame_create_matr_1)
+        self.but.config(text='Create Matrix', bg='red', height=2, width=23, command=self.create_matrix)
+        self.but.pack(side='top', expand=False)
+        Label(self.frame_widgets,
+              text='Create Objects:',
+              font='Arial 14').pack(side='top', expand=False)
+        self.frame_create_obj_1 = Frame(self.frame_parent, bg='gray')
+        self.frame_create_obj_1.pack(side='top', expand=False, fill='x')
+        Label(self.frame_create_obj_1,
+              text='Class',
+              bg='gray',
+              font='Arial 10').pack(side='left')
+        self.ent_class = Entry(self.frame_create_obj_1)
+        self.ent_class.pack(side='left')
+        Label(self.frame_create_obj_1, text='Count',
+              bg='gray',
+              font='Arial 10').pack(side='left')
+        self.ent_count = Entry(self.frame_create_obj_1)
+        self.ent_count.pack(side='left')
+        Label(self.frame_create_obj_1,
+              text='IPP',
+              bg='gray',
+              font='Arial 10').pack(side='left')
+        self.ent_IPP = Entry(self.frame_create_obj_1)
+        self.ent_IPP.pack(side='left')
+        self.but_create_obj = Button(self.frame_create_obj_1)
+        self.but_create_obj.config(text='Create Objects', bg='red', height=2, command=self.create_objects)
+        self.but_create_obj.pack(side='left')
+        self.frameSSSD = Frame(self.frame_parent, bg='gray')
+        self.frameSSSD.pack(side='top', expand=False, fill='x')
+        Label(self.frameSSSD, text='Start, Stop, Save, Download:', font='Arial 14').pack(side='top', expand=False,
+                                                                                         fill='x')
+        self.but_start = Button(self.frameSSSD)
+        self.but_start.config(text='Start', bg='red', width=10, command=self.start)
+        self.but_start.pack(side='left')
+        self.frame_1 = Frame(self.frameSSSD, width=6, bg='gray')
+        self.frame_1.pack(side='left')
+        self.but_stop = Button(self.frameSSSD)
+        self.but_stop.config(text='Stop', bg='red', width=10, command=self.stop)
+        self.but_stop.pack(side='left')
+        self.frame_2 = Frame(self.frameSSSD, width=6, bg='gray')
+        self.frame_2.pack(side='left')
+        self.but_save = Button(self.frameSSSD)
+        self.but_save.config(text='Save', bg='red', width=10, command=self.save)
+        self.but_save.pack(side='left')
+        self.frame_3 = Frame(self.frameSSSD, width=6, bg='gray')
+        self.frame_3.pack(side='left')
+        self.but_download = Button(self.frameSSSD)
+        self.but_download.config(text='Download', bg='red', width=10, command=self.download)
+        self.but_download.pack(side='left')
+        self.frame_4 = Frame(self.frameSSSD, width=6, bg='gray')
+        self.frame_4.pack(side='left')
+        self.ent_file = Entry(self.frameSSSD, width=35)
+        self.ent_file.pack(side='left')
+
+
+    def create_matrix(self):
+        self.x = int(self.ent_x.get())
+        self.y = int(self.ent_y.get())
+        self.game_controller = Controller(self.x, self.y)
+        frame_mat = Frame(self.frame_child)
+        frame_mat.pack(anchor=W)
+        for y in range(self.y):
+            frame_line = Frame(frame_mat)
+            frame_line.pack(side='top')
+            self.matrix.append([])
+            for x in range(self.x):
+                frame_elem = Frame(frame_line, bg='black', width=15, height=15)
+                self.matrix[y].append(frame_elem)
+                frame_elem.pack(side='left')
+
+    def create_objects(self):
+        if self.ent_IPP.get():
+            self.IPP = self.ent_IPP.get()
+        else:
+            self.IPP = None
+        if self.ent_count.get():
+            self.count = int(self.ent_count.get())
+        else:
+            self.count = 0
+        self.cls = self.ent_class.get()
+        if self.ent_class.get():
+            self.game_controller.create_objects(self.count, self.cls, self.IPP)
+        self.refresh()
+
+    def refresh(self):
+        self.list_of_objects = self.game_controller.matrix.get_list_of_objects()
+        for obj in (self.list_of_objects):
+            x = obj.cor_x
+            y = obj.cor_y
+            self.change_color(x,y,obj.color)
+
+    def change_color(self, x=0, y=0, color='black'):
+        self.matrix[y][x].config(bg=color)
+
+    def clean_matrix(self):
+        for y in range(self.y):
+            for x in range(self.x):
+                self.change_color(x,y)
+
+    def start(self):
+
+
+    def stop(self):
+        pass
+
+    def save(self):
+        pass
+
+    def download(self):
+        pass
+
+
+
+root = Tk()
+root.title('Matrix')
+
+interface = Interface(root)
+root.mainloop()
+
+
 
